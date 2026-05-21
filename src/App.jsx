@@ -1,6 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 
 function App() {
+  const [timeLeft, setTimeLeft] = useState(25 * 60);
+  const [mode, setMode] = useState("focus");
+
+  const focusTime = 25 * 60;
+  const breakTime = 5 * 60;
+
+  const minutes = Math.floor(timeLeft / 60);
+  const seconds = timeLeft % 60;
+
   const containerStyle = {
     height: "100vh",
     display: "flex",
@@ -19,7 +28,6 @@ function App() {
     fontSize: "2.5rem",
     fontWeight: "700",
     letterSpacing: "1px",
-    marginBottom: "10px",
   };
 
   const timerStyle = {
@@ -36,7 +44,6 @@ function App() {
   const controlsStyle = {
     display: "flex",
     gap: "12px",
-    marginTop: "10px",
     flexWrap: "wrap",
     justifyContent: "center",
   };
@@ -49,20 +56,18 @@ function App() {
     cursor: "pointer",
     background: "#1e293b",
     color: "white",
-    transition: "0.2s",
-  };
-
-  const buttonHover = {
-    background: "#334155",
   };
 
   return (
     <div style={containerStyle}>
       <h1 style={titleStyle}>Pomodoro Timer</h1>
 
-      <div style={timerStyle}>25:00</div>
+      <div style={timerStyle}>
+        {minutes.toString().padStart(2, "0")}:
+        {seconds.toString().padStart(2, "0")}
+      </div>
 
-      <h2 style={modeStyle}>FOCUS</h2>
+      <h2 style={modeStyle}>{mode.toUpperCase()}</h2>
 
       <div style={controlsStyle}>
         <button style={buttonStyle}>Start</button>
