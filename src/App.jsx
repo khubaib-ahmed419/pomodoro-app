@@ -4,11 +4,39 @@ function App() {
   const [timeLeft, setTimeLeft] = useState(25 * 60);
   const [mode, setMode] = useState("focus");
   const [isRunning, setIsRunning] = useState(false);
+  const [history, setHistory] = useState([]);
 
   const intervalRef = useRef(null);
 
   const focusTime = 25 * 60;
   const breakTime = 5 * 60;
+
+  const getTodayKey = () => {
+    return new Date().toISOString().split("T")[0];
+  };
+
+
+  useEffect(() => {
+    const saved = JSON.parse(localStorage.getItem("pomodoro-history"));
+    const today = getTodayKey();
+
+    if (saved && saved.date === today) {
+      setHistory(saved.history);
+    } else {
+      localStorage.removeItem("pomodoro-history");
+    }
+  }, []);
+
+  const saveHistory = (updatedHistory) => {
+    localStorage.setItem(
+      "pomodoro-history",
+      JSON.stringify({
+        date: getTodayKey(),
+        history: updatedHistory,
+      })
+    );
+  };
+
 
   useEffect(() => {
     if (!isRunning) return;
@@ -16,10 +44,30 @@ function App() {
     intervalRef.current = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
+          if (mode === "focus") {
+            const newEntry = {
+              id: Date.now(),
+              duration: focusTime,
+              time: new Date().toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              }),
+            };
+
+            setHistory((prevHistory) => {
+              const updated = [...prevHistory, newEntry];
+              saveHistory(updated);
+              return updated;
+            });
+          }
+          
+
           const nextMode = mode === "focus" ? "break" : "focus";
           setMode(nextMode);
+
           return nextMode === "focus" ? focusTime : breakTime;
         }
+
         return prev - 1;
       });
     }, 1000);
@@ -27,7 +75,11 @@ function App() {
     return () => clearInterval(intervalRef.current);
   }, [isRunning, mode]);
 
-  const handleStart = () => setIsRunning(true);
+  
+  const handleStart = () => {
+    if (isRunning) return;
+    setIsRunning(true);
+  };
 
   const handlePause = () => {
     setIsRunning(false);
@@ -41,6 +93,11 @@ function App() {
     setTimeLeft(focusTime);
   };
 
+  
+  const minutes = Math.floor(timeLeft / 60);
+  const seconds = timeLeft % 60;
+
+  
   const containerStyle = {
     height: "100vh",
     display: "flex",
@@ -85,9 +142,9 @@ function App() {
     color: "white",
   };
 
-  const minutes = Math.floor(timeLeft / 60);
-  const seconds = timeLeft % 60;
-
+  // ----------------------------
+  // UI
+  // ----------------------------
   return (
     <div style={containerStyle}>
       <h1 style={titleStyle}>Pomodoro Timer</h1>
@@ -109,6 +166,23 @@ function App() {
         <button style={buttonStyle} onClick={handleReset}>
           Reset
         </button>
+      </div>
+
+      {/* HISTORY */}
+      <div style={{ marginTop: "30px", textAlign: "left" }}>
+        <h3 style={{ fontSize: "1.2rem" }}>
+          Today's Focus Sessions
+        </h3>
+
+        {history.length === 0 ? (
+          <p style={{ opacity: 0.6 }}>No sessions yet</p>
+        ) : (
+          history.map((item) => (
+            <div key={item.id} style={{ marginTop: "8px", opacity: 0.9 }}>
+              ✓ 25:00 focus — {item.time}
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
