@@ -7,14 +7,24 @@ function App() {
   const [history, setHistory] = useState([]);
 
   const intervalRef = useRef(null);
+  const audioRef = useRef(null);
 
   const focusTime = 25 * 60;
   const breakTime = 5 * 60;
 
+  const playBeep = () => {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioCtx.createOscillator();
+    oscillator.type = "sine";
+    oscillator.frequency.setValueAtTime(800, audioCtx.currentTime);
+    oscillator.connect(audioCtx.destination);
+    oscillator.start();
+    oscillator.stop(audioCtx.currentTime + 0.2);
+  };
+
   const getTodayKey = () => {
     return new Date().toISOString().split("T")[0];
   };
-
 
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem("pomodoro-history"));
@@ -37,13 +47,14 @@ function App() {
     );
   };
 
-
   useEffect(() => {
     if (!isRunning) return;
 
     intervalRef.current = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
+          playBeep();
+
           if (mode === "focus") {
             const newEntry = {
               id: Date.now(),
@@ -60,7 +71,6 @@ function App() {
               return updated;
             });
           }
-          
 
           const nextMode = mode === "focus" ? "break" : "focus";
           setMode(nextMode);
@@ -75,7 +85,6 @@ function App() {
     return () => clearInterval(intervalRef.current);
   }, [isRunning, mode]);
 
-  
   const handleStart = () => {
     if (isRunning) return;
     setIsRunning(true);
@@ -93,11 +102,11 @@ function App() {
     setTimeLeft(focusTime);
   };
 
-  
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
 
-  
+  const isFocus = mode === "focus";
+
   const containerStyle = {
     height: "100vh",
     display: "flex",
@@ -107,9 +116,10 @@ function App() {
     gap: "20px",
     textAlign: "center",
     padding: "20px",
-    background: "#0f172a",
-    color: "white",
     fontFamily: "system-ui, Arial, sans-serif",
+    background: isFocus ? "#0f172a" : "#064e3b",
+    color: "white",
+    transition: "0.3s ease",
   };
 
   const titleStyle = {
@@ -124,12 +134,14 @@ function App() {
 
   const modeStyle = {
     fontSize: "1.5rem",
-    opacity: 0.8,
+    opacity: 0.9,
   };
 
   const controlsStyle = {
     display: "flex",
     gap: "12px",
+    flexWrap: "wrap",
+    justifyContent: "center",
   };
 
   const buttonStyle = {
@@ -142,9 +154,12 @@ function App() {
     color: "white",
   };
 
-  // ----------------------------
-  // UI
-  // ----------------------------
+  const disabledStyle = {
+    ...buttonStyle,
+    opacity: 0.5,
+    cursor: "not-allowed",
+  };
+
   return (
     <div style={containerStyle}>
       <h1 style={titleStyle}>Pomodoro Timer</h1>
@@ -154,25 +169,29 @@ function App() {
         {seconds.toString().padStart(2, "0")}
       </div>
 
-      <h2 style={modeStyle}>{mode.toUpperCase()}</h2>
+      <h2 style={modeStyle}>
+        {mode.toUpperCase()} {isRunning ? "" : "(PAUSED)"}
+      </h2>
 
       <div style={controlsStyle}>
-        <button style={buttonStyle} onClick={handleStart}>
+        <button
+          style={isRunning ? disabledStyle : buttonStyle}
+          onClick={handleStart}
+        >
           Start
         </button>
+
         <button style={buttonStyle} onClick={handlePause}>
           Pause
         </button>
+
         <button style={buttonStyle} onClick={handleReset}>
           Reset
         </button>
       </div>
 
-      {/* HISTORY */}
-      <div style={{ marginTop: "30px", textAlign: "left" }}>
-        <h3 style={{ fontSize: "1.2rem" }}>
-          Today's Focus Sessions
-        </h3>
+      <div style={{ marginTop: "30px", textAlign: "left", maxWidth: "400px" }}>
+        <h3 style={{ fontSize: "1.2rem" }}>Today's Focus Sessions</h3>
 
         {history.length === 0 ? (
           <p style={{ opacity: 0.6 }}>No sessions yet</p>
