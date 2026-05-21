@@ -1,14 +1,45 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 function App() {
   const [timeLeft, setTimeLeft] = useState(25 * 60);
   const [mode, setMode] = useState("focus");
+  const [isRunning, setIsRunning] = useState(false);
+
+  const intervalRef = useRef(null);
 
   const focusTime = 25 * 60;
   const breakTime = 5 * 60;
 
-  const minutes = Math.floor(timeLeft / 60);
-  const seconds = timeLeft % 60;
+  useEffect(() => {
+    if (!isRunning) return;
+
+    intervalRef.current = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          const nextMode = mode === "focus" ? "break" : "focus";
+          setMode(nextMode);
+          return nextMode === "focus" ? focusTime : breakTime;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(intervalRef.current);
+  }, [isRunning, mode]);
+
+  const handleStart = () => setIsRunning(true);
+
+  const handlePause = () => {
+    setIsRunning(false);
+    clearInterval(intervalRef.current);
+  };
+
+  const handleReset = () => {
+    setIsRunning(false);
+    clearInterval(intervalRef.current);
+    setMode("focus");
+    setTimeLeft(focusTime);
+  };
 
   const containerStyle = {
     height: "100vh",
@@ -27,13 +58,11 @@ function App() {
   const titleStyle = {
     fontSize: "2.5rem",
     fontWeight: "700",
-    letterSpacing: "1px",
   };
 
   const timerStyle = {
     fontSize: "6rem",
     fontWeight: "700",
-    letterSpacing: "2px",
   };
 
   const modeStyle = {
@@ -44,8 +73,6 @@ function App() {
   const controlsStyle = {
     display: "flex",
     gap: "12px",
-    flexWrap: "wrap",
-    justifyContent: "center",
   };
 
   const buttonStyle = {
@@ -57,6 +84,9 @@ function App() {
     background: "#1e293b",
     color: "white",
   };
+
+  const minutes = Math.floor(timeLeft / 60);
+  const seconds = timeLeft % 60;
 
   return (
     <div style={containerStyle}>
@@ -70,9 +100,15 @@ function App() {
       <h2 style={modeStyle}>{mode.toUpperCase()}</h2>
 
       <div style={controlsStyle}>
-        <button style={buttonStyle}>Start</button>
-        <button style={buttonStyle}>Pause</button>
-        <button style={buttonStyle}>Reset</button>
+        <button style={buttonStyle} onClick={handleStart}>
+          Start
+        </button>
+        <button style={buttonStyle} onClick={handlePause}>
+          Pause
+        </button>
+        <button style={buttonStyle} onClick={handleReset}>
+          Reset
+        </button>
       </div>
     </div>
   );
