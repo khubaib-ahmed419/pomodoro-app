@@ -1,16 +1,36 @@
-# React + Vite
+# Pomodoro Timer App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A responsive Pomodoro Timer web application built with React.  
+The app helps users stay productive using the Pomodoro technique with automatic focus/break cycles and daily session tracking.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Features
 
-## React Compiler
+- ⏱️ Focus timer (25 minutes)
+- ☕ Break timer (5 minutes)
+- ▶️ Start, Pause, and Reset controls
+- 🔄 Automatic switching between focus and break sessions
+- 📜 Daily history of completed focus sessions
+- 💾 Persistent history using localStorage
+- 🔊 Audible beep sound when a session ends
+- 🎨 Dynamic UI theme switching for focus and break modes
+- 📱 Responsive design for mobile and desktop
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## 🛠️ Tech Stack
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- React
+- JavaScript (ES6+)
+- Inline CSS Styling
+- Browser localStorage API
+
+---
+
+## 📦 Installation & Setup
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/khubaib-ahmed419/pomodoro-app.git
